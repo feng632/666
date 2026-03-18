@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>多光谱材料识别数据管理系统</title>
+    <link rel="stylesheet" href="骨架粗略.css" />
+  </head>
+
+  <body>
+    <div class="hero-container">
+      <header class="navbar">
+        <a href="bone骨架（首页）.html"><div class="logo">计设</div></a>
+        <nav class="nav-links">
+          <div class="nav-item has-dropdown">
+            <button class="nav-btn">
+              识别材料<span class="arrow">▾</span>
+            </button>
+            <div class="dropdown-menu">
+              <a href="bone骨架 连接设备.html">连接设备</a>
+              <a href="bone骨架 测试模块.html">识别区域</a>
+            </div>
+          </div>
+          <a href="#" class="nav-btn">查询材料</a>
+          <a href="#" class="nav-btn">关于我们</a>
+        </nav>
+        <a href="bone骨架 （模板）.html"
+          ><button class="cta-btn">欢迎</button></a
+        >
+      </header>
+
+      <div class="sys-main-container">
+        <div class="left-panel glass-panel" style="overflow-y: auto">
+          <div class="search-title">物资编号检索系统</div>
+          <div class="search-row">
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="请输入1-3位物资编号 (如: 001)"
+              onkeypress="if (event.key === 'Enter') performSearch();"
+            />
+            <button class="search-btn-inline" onclick="performSearch()">
+              执行搜索
+            </button>
+          </div>
+          <div
+            class="result-box"
+            id="resultDisplay"
+            style="
+              flex-shrink: 0;
+              padding: 10px;
+              height: auto;
+              min-height: 80px;
+            "
+          >
+            等待检索...
+          </div>
+
+          <div class="action-divider"></div>
+
+          <div class="add-section">
+            <div class="add-title">➕ 录入新材料</div>
+            <input
+              type="text"
+              id="addName"
+              class="search-input add-input"
+              placeholder="输入材料名称 (如: 硫酸铜 CuSO₄)"
+            />
+            <textarea
+              id="addDesc"
+              class="search-input add-input"
+              placeholder="输入材料详细简介..."
+              rows="2"
+            ></textarea>
+            <button class="add-btn-inline" onclick="addMaterial()">
+              提交并自动生成编号
+            </button>
+            <div class="add-result" id="addResultDisplay"></div>
+          </div>
+        </div>
+
+        <div class="right-panel glass-panel">
+          <div class="data-dictionary">
+            <h3
+              style="
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                padding-bottom: 10px;
+                margin-top: 0;
+                font-weight: 300;
+                letter-spacing: 1px;
+              "
+            >
+              系统演示数据库 (实时更新)
+            </h3>
+            <ul class="data-list" id="demoList"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ================= 1. 导航栏逻辑 =================
+      const dropdownContainer = document.querySelector(".has-dropdown");
+      const dropdownBtn = dropdownContainer.querySelector(".nav-btn");
+      const dropdownMenu = dropdownContainer.querySelector(".dropdown-menu");
+
+      dropdownBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdownMenu.classList.toggle("show");
+        dropdownContainer.classList.toggle("active");
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!dropdownContainer.contains(e.target)) {
+          dropdownMenu.classList.remove("show");
+          dropdownContainer.classList.remove("active");
+        }
+      });
+
+      // ================= 2. 数据库与渲染逻辑 =================
+      const database = {
+        "001": {
+          name: "304不锈钢 (SUS304)",
+          desc: "成分: Cr 18-20%, Ni 8-10.5%, C ≤0.08%, Fe 余量。简介：最常见的奥氏体不锈钢，具有良好的耐蚀性和成型性，广泛用于食品设备和一般化工设备。",
+        },
+        "002": {
+          name: "316不锈钢 (SUS316)",
+          desc: "成分: Cr 16-18%, Ni 10-14%, Mo 2-3%, Fe 余量。简介：添加了钼元素，相比304具有更优异的抗点蚀和抗氯离子腐蚀能力，常用于海洋及医疗环境。",
+        },
+        "003": {
+          name: "6061铝合金 (Al-Mg-Si系)",
+          desc: "成分: Mg 0.8-1.2%, Si 0.4-0.8%, Cu 0.15-0.4%, Al 余量。简介：常见的可热处理强化铝合金，机械性能和焊接性良好，广泛应用于自动化机械零件和结构件。",
+        },
+        "004": {
+          name: "7075铝合金 (Al-Zn-Mg-Cu系)",
+          desc: "成分: Zn 5.1-6.1%, Mg 2.1-2.9%, Cu 1.2-2.0%, Al 余量。简介：被称为超硬铝，是航空级高强度铝合金，强度极高但耐腐蚀性略差，主要用于航空航天领域。",
+        },
+        "005": {
+          name: "TC4钛合金 (Ti-6Al-4V)",
+          desc: "成分: Al 5.5-6.75%, V 3.5-4.5%, Fe ≤0.3%, Ti 余量。简介：工业中最广泛使用的α-β型钛合金，具有极高的比强度和优异的生物相容性，常用于航空及医疗植入物。",
+        },
+        "006": {
+          name: "H62普通黄铜 (Cu-Zn合金)",
+          desc: "成分: Cu 60.5-63.5%, Zn 36.5-39.5%。简介：最常见的铜锌合金，具有良好的力学性能、导电性和切削加工性，常用于制造阀门、水管及五金冲压件。",
+        },
+        "007": {
+          name: "QBe2铍青铜 (Cu-Be合金)",
+          desc: "成分: Be 1.8-2.1%, Ni+Co ≥0.2%, Cu 余量。简介：以铍为主要添加元素的铜合金，具有极高的弹性极限、疲劳强度和无火花特性，多用于精密弹簧和电接触件。",
+        },
+        "008": {
+          name: "Inconel 718 镍基高温合金",
+          desc: "成分: Ni 50-55%, Cr 17-21%, Nb+Ta 4.75-5.5%, Mo 2.8-3.3%, Fe 余量。简介：沉淀硬化型镍基合金，在650℃高温下依然具备极高的屈服强度，是航空发动机的核心材料。",
+        },
+        "009": {
+          name: "AZ31B变形镁合金",
+          desc: "成分: Al 2.5-3.5%, Zn 0.6-1.4%, Mn 0.2-1.0%, Mg 余量。简介：最常用的镁合金，密度极小且比强度高，具有良好的减震和电磁屏蔽性能，多用于3C电子产品外壳。",
+        },
+        "010": {
+          name: "Q235普通碳素结构钢",
+          desc: "成分: C ≤0.22%, Mn 0.3-0.8%, Si ≤0.35%, Fe 余量。简介：应用最广的普碳钢，综合力学性能较好，焊接性优良，大量应用于建筑结构、桥梁及普通机械零件。",
+        },
+      };
+
+      // 将渲染列表封装成独立函数，方便新增数据后调用
+      function refreshList() {
+        const listElement = document.getElementById("demoList");
+        listElement.innerHTML = ""; // 先清空现有列表
+
+        // 【优化】保证右侧列表按照编号从小到大排序显示
+        const keys = Object.keys(database).sort();
+        for (let code of keys) {
+          let li = document.createElement("li");
+          li.innerHTML = `<span class="badge">${code}</span> ${database[code].name}`;
+          listElement.appendChild(li);
+        }
+
+        // 让滚动条自动滚到最底部，方便查看最新添加的项
+        const dictContainer = document.querySelector(".data-dictionary");
+        if (dictContainer) {
+          dictContainer.scrollTop = dictContainer.scrollHeight;
+        }
+      }
+
+      // 页面加载时初始渲染
+      window.onload = refreshList;
+
+      // ================= 3. 搜索逻辑 =================
+      function performSearch() {
+        const query = document.getElementById("searchInput").value.trim();
+        const resultDisplay = document.getElementById("resultDisplay");
+
+        if (query === "") {
+          resultDisplay.innerHTML =
+            '<span style="color:#f7e018;">⚠️ 请输入需要检索的物资编号</span>';
+          resultDisplay.style.borderColor = "#f7e018";
+          resultDisplay.style.backgroundColor = "rgba(247, 224, 24, 0.1)";
+          return;
+        }
+
+        const item = database[query];
+        if (item) {
+          // 【修复点2】添加 box-sizing、适当的行高、字体大小调整和换行机制
+          resultDisplay.innerHTML = `
+          <div style="text-align: left; padding: 10px; width: 100%; box-sizing: border-box;">
+              <div style="margin-bottom: 10px; line-height: 1.3;">✅ 检索成功：<strong style="color:#00e676; font-size:20px;">${item.name}</strong></div>
+              <div style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; font-weight: 300; white-space: normal; word-break: break-word;">📝 ${item.desc}</div>
+          </div>
+        `;
+          resultDisplay.style.borderColor = "#00e676";
+          resultDisplay.style.backgroundColor = "rgba(0, 230, 118, 0.15)";
+        } else {
+          resultDisplay.innerHTML = `❌ 未找到编号为 <strong style="color:#ff4757;">[${query}]</strong> 的物资`;
+          resultDisplay.style.borderColor = "#ff4757";
+          resultDisplay.style.backgroundColor = "rgba(255, 71, 87, 0.15)";
+        }
+      }
+
+      // ================= 4. 新增材料与自动编号逻辑 =================
+      function addMaterial() {
+        const nameInput = document.getElementById("addName").value.trim();
+        const descInput = document.getElementById("addDesc").value.trim();
+        const addResult = document.getElementById("addResultDisplay");
+
+        // 验证输入是否为空
+        if (nameInput === "" || descInput === "") {
+          addResult.innerHTML =
+            '<span style="color:#ff4757;">⚠️ 失败：名称和简介不能为空！</span>';
+          return;
+        }
+
+        // 核心算法：遍历当前字典，找出最大的编号
+        let maxId = 0;
+        for (let code in database) {
+          const num = parseInt(code, 10);
+          if (num > maxId) {
+            maxId = num;
+          }
+        }
+
+        // 生成新编号 (加1后，补足3位，例如 5 -> "006")
+        const newIdNum = maxId + 1;
+        const newIdStr = String(newIdNum).padStart(3, "0");
+
+        // 存入数据库对象
+        database[newIdStr] = {
+          name: nameInput,
+          desc: descInput,
+        };
+
+        // 更新UI显示
+        refreshList();
+
+        // 清空输入框并提示成功
+        document.getElementById("addName").value = "";
+        document.getElementById("addDesc").value = "";
+        addResult.innerHTML = `<span style="color:#00e676;">✅ 成功录入！自动分配编号: [${newIdStr}]</span>`;
+
+        // 3秒后清除成功提示
+        setTimeout(() => {
+          addResult.innerHTML = "";
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>

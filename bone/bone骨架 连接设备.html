@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多光谱材料识别数据管理系统</title>
+    <link rel="stylesheet" href="骨架粗略.css">
+    <style>
+            /* ==========================================
+   三卡片展示模块专属样式
+   ========================================== */
+
+/* 1. 专属排版定位：让卡片组居中且占据大部分宽度 */
+.gallery-layout {
+  left: 5%;
+  top: 20%;  /* 稍微靠上一点，给大卡片留出高度 */
+  width: 90%; /* 占据屏幕 90% 的宽度 */
+}
+
+/* 2. 弹性容器：控制三个卡片横向排列 */
+.showcase-container {
+  display: flex;
+  gap: 25px; /* 卡片之间的间距 */
+  width: 100%;
+  height: 500px; /* 固定卡片高度，你可以根据喜好微调 */
+}
+
+/* 3. 卡片本体样式 */
+.showcase-card {
+  flex: 1; /* 【核心技巧】让三个卡片无脑平分 100% 的宽度 */
+  border-radius: 24px; /* 参考图里的大圆角 */
+  background-size: 100%;
+  background-position: center;
+  position: relative;
+  overflow: hidden; /* 保证底部的遮罩不会漏出圆角 */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* 深色阴影 */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* 极淡的边框增加质感 */
+  transition: transform 0.4s ease, box-shadow 0.4s ease,background-size 0.4s ease;; /* 动画过渡 */
+  cursor: pointer;
+}
+
+/* 4. 鼠标悬浮时的微交互：卡片微微上浮并加深阴影 */
+.showcase-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  background-size: 120%;
+}
+
+/* 5. 【点睛之笔】底部渐变遮罩，保护文字可读性 */
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%; /* 遮罩占卡片下半部分 60% 的高度 */
+  /* 从下到上，从 90% 不透明的黑色 渐变到 完全透明 */
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+  z-index: 1;
+}
+
+/* 6. 文字排版 */
+.card-content {
+  position: absolute;
+  bottom: 40px; /* 距离底部 40px */
+  left: 40px;   /* 距离左边 40px */
+  color: white;
+  z-index: 2; /* 确保文字漂浮在渐变遮罩之上 */
+}
+
+.card-data {
+  font-size: 1.8rem; /* 巨大的数字 */
+  font-weight: 300;
+  margin: 0 0 10px 0;
+  line-height: 1;
+  background-color: rgba(0, 0, 0, 0);
+  color: greenyellow;
+  border-radius: 12px;
+  padding: 20px;
+  border-color: greenyellow;
+  transition: 0.5s ease;
+}
+
+.card-data:hover{
+  background-color: greenyellow;
+  color: black;
+}
+
+.card-label {
+  font-size: 1.1rem;
+  color: #cccccc;
+  margin: 0;
+}
+
+.add-device-btn {
+  width: 100%; /* 和上面的三个卡片总宽度严格对齐 */
+  margin-top: 30px; /* 距离上面卡片的间距 */
+  padding: 20px 0;
+  
+  /* 科技感核心：暗色半透明底 + 虚线边框 */
+  background: rgba(255, 255, 255, 0.03); 
+  border: 2px dashed rgba(255, 255, 255, 0.2); 
+  border-radius: 16px; 
+  
+  color: #a0a0a0;
+  font-size: 16px;
+  letter-spacing: 2px; /* 字间距拉开一点更高级 */
+  cursor: pointer;
+  
+  /* 用 Flex 居中文字和加号 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px; 
+  
+  transition: all 0.3s ease;
+}
+
+.plus-icon {
+  font-size: 28px; /* 让加号显眼一点 */
+  font-weight: 300;
+  line-height: 0.8; /* 修正加号在垂直方向上的视觉偏移 */
+}
+
+/* 鼠标悬浮时的炫酷交互 */
+.add-device-btn:hover {
+  background: rgba(255, 255, 255, 0.08); /* 底色微微变亮 */
+  border: 2px solid #f7e018; /* 虚线变实线，并使用你们的主题黄色 */
+  color: #f7e018; /* 文字和加号变黄 */
+  box-shadow: 0 0 20px rgba(247, 224, 24, 0.15); /* 增加一层微弱的黄色发光效果 */
+  transform: translateY(-2px); /* 按钮整体微微上浮 */
+}
+
+
+
+
+    </style>
+</head>
+<body>
+
+<div class="hero-container">
+  
+  <header class="navbar">
+    <a href="bone骨架（首页）.html">
+      <div class="logo">计设</div>
+    </a>
+    
+    <nav class="nav-links">
+      <div class="nav-item has-dropdown">
+        <button class="nav-btn">识别材料<span class="arrow">▾</span></button>
+        <div class="dropdown-menu">
+          <a href="#">连接设备</a>
+          <a href="bone骨架 测试模块.html">识别区域</a>
+          
+        </div>
+      </div>
+      
+      <a href="#" class="nav-btn"id="queryBtn-shibie">查询材料</a>
+      <a href="#" class="nav-btn">关于我们</a>
+      <!-- <a href="#" class="nav-btn">Team</a>
+      <a href="#" class="nav-btn">News</a> -->
+    </nav>
+
+    <a href="bone骨架 （模板）.html">
+      <button class="cta-btn">
+      欢迎
+      </button>
+    </a>
+  </header>
+
+   <main class="main-content gallery-layout">
+    <div class="showcase-container">
+      
+      <div class="showcase-card" style="background-image: url('shebei.jpg');">
+        <div class="card-overlay"></div> <div class="card-content">
+          <button class="card-data">·已连接</button>
+          <p class="card-label">光谱分析仪</p>
+        </div>
+      </div>
+
+      <div class="showcase-card" style="background-image: url('shebei.jpg');">
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <button class="card-data">·已连接</button>
+          <p class="card-label">摄像头</p>
+        </div>
+      </div>
+
+      <div class="showcase-card" style="background-image: url('shebei.jpg');">
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <button class="card-data">·已连接</button>
+          <p class="card-label">不知道还有什么仪器</p>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="add-device-btn">
+    <span class="plus-icon">+</span>
+    <span>添加新设备</span>
+  </button>
+  </main>
+
+
+
+
+  
+
+</div>
+
+<script>
+  // 获取需要点击的元素和需要显示的菜单
+const dropdownContainer = document.querySelector('.has-dropdown');
+const dropdownBtn = dropdownContainer.querySelector('.nav-btn');
+const dropdownMenu = dropdownContainer.querySelector('.dropdown-menu');
+
+// 点击按钮时触发
+dropdownBtn.addEventListener('click', function(e) {
+  e.preventDefault(); // 阻止a标签默认跳转
+  e.stopPropagation();
+  
+  // 切换菜单的显示/隐藏状态
+  dropdownMenu.classList.toggle('show');
+  
+  // 给父容器加个active类，用来改变按钮自己（从透明变成白色）的样式
+  dropdownContainer.classList.toggle('active');
+});
+
+// 进阶优化：点击页面其他地方时，关掉下拉菜单
+document.addEventListener('click', function(e) {
+  if (!dropdownContainer.contains(e.target)) {
+    dropdownMenu.classList.remove('show');
+    dropdownContainer.classList.remove('active');
+  }
+});
+
+
+// ==========================================
+// 导航栏按钮跳转逻辑 (读取本地存储)
+// ==========================================
+
+const queryBtn = document.getElementById('queryBtn-shibie');
+
+queryBtn.addEventListener('click', function(e) {
+    e.preventDefault(); // 阻止默认的 # 跳转
+    
+    // 从浏览器“门禁卡”中读取身份
+    const currentRole = localStorage.getItem('userRole');
+    
+    // 如果没有读到身份（说明没登录或者清除了缓存）
+    if (!currentRole) {
+        alert('您尚未登录或登录已过期，请先返回首页登录！');
+        window.location.href = 'bone骨架（首页）.html'; // 踢回首页
+        return;
+    }
+    
+    // 根据读到的身份，跳转到对应的查询页面
+    // （注意：下面这些 html 文件名你要换成你实际建好的页面名字）
+    if (currentRole === 'admin') {
+        window.location.href = 'Administrator.html'; // 管理员查询页
+        
+    } else if (currentRole === 'student') {
+        window.location.href = 'student.html'; // 学生查询页
+        
+    } else if (currentRole === 'teacher') {
+        window.location.href = 'teacher.html'; // 教师查询页
+    }
+});
+
+
+
+</script>
+
+
+
+
+
+
+    
+</body>
+</html>

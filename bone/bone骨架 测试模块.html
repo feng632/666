@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多光谱材料识别数据管理系统</title>
+    <link rel="stylesheet" href="骨架粗略.css">
+</head>
+<body>
+
+<div class="hero-container">
+  
+  <header class="navbar">
+    <a href="bone骨架（首页）.html">
+      <div class="logo">计设</div>
+    </a>
+    
+    <nav class="nav-links">
+      <div class="nav-item has-dropdown">
+        <button class="nav-btn">识别材料<span class="arrow">▾</span></button>
+        <div class="dropdown-menu">
+          <a href="bone骨架 连接设备.html">连接设备</a>
+          <a href="#">识别区域</a>
+          
+        </div>
+      </div>
+      
+      <a href="#" class="nav-btn" id="queryBtn">查询材料</a>
+      <a href="#" class="nav-btn">关于我们</a>
+      <!-- <a href="#" class="nav-btn">Team</a>
+      <a href="#" class="nav-btn">News</a> -->
+    </nav>
+
+    <a href="bone骨架 （模板）.html">
+      <button class="cta-btn">
+      欢迎
+      </button>
+    </a>
+  </header>
+
+
+  <!-- ===============这里是测试区域的浮快============== -->
+
+  <main class="main-content">
+    <div class="module-container">
+      
+      <div class="data-card text-card">
+        <div class="card-badge">
+          <span class="badge-icon">⨂</span> 测试模块
+        </div>
+        <h2 class="card-title">使用说明</h2>
+        <p class="card-desc">
+          使用前请检查设备连接状态（添加设备区域），若设备连接正常，按下“开始测试”按钮，右侧窗口会显示当前材料光波图及成分信息。若要将成分信息存入数据库，点击“存入数据库”按钮即可。
+        </p>
+      </div>
+
+      <div class="data-card chart-card">
+        <div class="card-badge">光波图实时监测</div>
+        
+        <div class="chart-placeholder" id="waveformContainer">
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:rgba(235, 87, 87, 0.6); stop-opacity:1" />
+                <stop offset="100%" style="stop-color:rgba(235, 87, 87, 0.05); stop-opacity:0.1" />
+              </linearGradient>
+            </defs>
+            <path id="waveformFill" d="" fill="url(#waveGradient)" />
+            <path id="waveformPath" d="" stroke="#eb5757" stroke-width="0.5" fill="none" />
+          </svg>
+        </div>
+
+        
+
+        <div class="status-section">
+          <div class="status-header">成分信息分析</div>
+          <ul class="status-list">
+            <li>
+              <span class="location">铁</span>
+              <span class="status" id="comp1">等待测试...</span>
+            </li>
+            <li>
+              <span class="location">镍</span>
+              <span class="status" id="comp2">等待测试...</span>
+            </li>
+            <li>
+              <span class="location">铬</span>
+              <span class="status" id="comp3">等待测试...</span>
+            </li>
+          </ul>
+          <button class="cta-btn small-btn" id="startTestBtn">开始测试</button>
+          <button class="cta-btn small-btn" id="saveDataBtn" style="margin-top: 20px;  border-color: #f7e018;">存入数据库</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+
+
+
+  
+
+</div>
+
+<script>
+  // 获取需要点击的元素和需要显示的菜单
+const dropdownContainer = document.querySelector('.has-dropdown');
+const dropdownBtn = dropdownContainer.querySelector('.nav-btn');
+const dropdownMenu = dropdownContainer.querySelector('.dropdown-menu');
+
+// 点击按钮时触发
+dropdownBtn.addEventListener('click', function(e) {
+  e.preventDefault(); // 阻止a标签默认跳转
+  e.stopPropagation();
+  
+  // 切换菜单的显示/隐藏状态
+  dropdownMenu.classList.toggle('show');
+  
+  // 给父容器加个active类，用来改变按钮自己（从透明变成白色）的样式
+  dropdownContainer.classList.toggle('active');
+});
+
+// 进阶优化：点击页面其他地方时，关掉下拉菜单
+document.addEventListener('click', function(e) {
+  if (!dropdownContainer.contains(e.target)) {
+    dropdownMenu.classList.remove('show');
+    dropdownContainer.classList.remove('active');
+  }
+});
+
+
+
+
+// ==========================================
+// 开始测试模块交互逻辑
+// ==========================================
+
+const startTestBtn = document.getElementById('startTestBtn');
+const saveDataBtn = document.getElementById('saveDataBtn');
+const waveformPath = document.getElementById('waveformPath');
+const waveformFill = document.getElementById('waveformFill');
+
+// 模拟生成类似光谱波形的数据
+function generateSpectrumWaveform() {
+    const points = 60; 
+    const startX = 0;
+    const endX = 100;
+    
+    // 随机生成几个峰值，模拟光谱的吸收峰
+    const peak1X = 20 + Math.random() * 20;
+    const peak2X = 60 + Math.random() * 20;
+    const baseNoise = 70 + Math.random() * 10; // 底部基线
+
+    let dString = `M ${startX} ${baseNoise}`;
+    
+    for (let i = 0; i <= points; i++) {
+        const x = startX + (endX - startX) * (i / points);
+        
+        // 利用高斯函数模拟光谱的波峰
+        const peak1 = 40 * Math.exp(-Math.pow(x - peak1X, 2) / 50);
+        const peak2 = 50 * Math.exp(-Math.pow(x - peak2X, 2) / 80);
+        
+        // Y坐标 = 基线 - 波峰 - 随机噪点 (因为SVG的Y轴是朝下的，减去才是向上凸起)
+        let y = baseNoise - peak1 - peak2 - (Math.random() * 3);
+        y = Math.max(5, Math.min(95, y)); // 限制边界
+        
+        dString += ` L ${x} ${y}`;
+    }
+
+    return { 
+        stroke: dString, 
+        fill: dString + ` L 100 100 L 0 100 Z` // 闭合填充区域
+    };
+}
+
+// 初始状态：画一条平缓的线
+waveformPath.setAttribute('d', 'M 0 80 L 100 80');
+waveformFill.setAttribute('d', 'M 0 80 L 100 80 L 100 100 L 0 100 Z');
+
+// 监听“开始测试”按钮点击
+startTestBtn.addEventListener('click', function() {
+    // 1. 生成新光波图
+    const newWave = generateSpectrumWaveform();
+    waveformPath.setAttribute('d', newWave.stroke);
+    waveformFill.setAttribute('d', newWave.fill);
+    
+    // 2. 模拟分析出随机的成分数据
+    document.getElementById('comp1').innerText = (12 + Math.random() * 5).toFixed(2) + ' %';
+    document.getElementById('comp2').innerText = (25 + Math.random() * 10).toFixed(2) + ' %';
+    document.getElementById('comp3').innerText = (8 + Math.random() * 4).toFixed(2) + ' %';
+});
+
+// 监听“存入数据库”按钮点击
+saveDataBtn.addEventListener('click', function() {
+    // 检查是不是还没测试就按了
+    if (document.getElementById('comp1').innerText === '等待测试...') {
+        alert('请先点击“开始测试”生成数据，然后再存入数据库！');
+        return;
+    }
+    alert('分析数据已成功同步至后台数据库！');
+});
+
+
+// ==========================================
+// 导航栏按钮跳转逻辑 (读取本地存储)
+// ==========================================
+
+const queryBtn = document.getElementById('queryBtn');
+
+queryBtn.addEventListener('click', function(e) {
+    e.preventDefault(); // 阻止默认的 # 跳转
+    
+    // 从浏览器“门禁卡”中读取身份
+    const currentRole = localStorage.getItem('userRole');
+    
+    // 如果没有读到身份（说明没登录或者清除了缓存）
+    if (!currentRole) {
+        alert('您尚未登录或登录已过期，请先返回首页登录！');
+        window.location.href = 'bone骨架（首页）.html'; // 踢回首页
+        return;
+    }
+    
+    // 根据读到的身份，跳转到对应的查询页面
+    // （注意：下面这些 html 文件名你要换成你实际建好的页面名字）
+    if (currentRole === 'admin') {
+        window.location.href = 'Administrator.html'; // 管理员查询页
+        
+    } else if (currentRole === 'student') {
+        window.location.href = 'student.html'; // 学生查询页
+        
+    } else if (currentRole === 'teacher') {
+        window.location.href = 'teacher.html'; // 教师查询页
+    }
+});
+
+
+</script>
+
+
+
+
+
+
+    
+</body>
+</html>

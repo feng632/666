@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多光谱材料识别数据管理系统</title>
+    <link rel="stylesheet" href="骨架粗略.css">
+</head>
+<body>
+
+<div class="hero-container">
+  
+  <header class="navbar">
+    <a href="bone骨架（首页）.html">
+      <div class="logo">计设</div>
+    </a>
+    
+    <nav class="nav-links">
+      <div class="nav-item has-dropdown">
+        <button class="nav-btn">识别材料<span class="arrow">▾</span></button>
+        <div class="dropdown-menu">
+          <a href="bone骨架 连接设备.html">连接设备</a> 
+          <a href="bone骨架 测试模块.html">识别区域</a>
+        
+        </div>
+      </div>
+      
+      <a href="teacher.html" class="nav-btn">查询材料</a>
+      <a href="#" class="nav-btn">关于我们</a>
+      <!-- <a href="#" class="nav-btn">Team</a>
+      <a href="#" class="nav-btn">News</a> -->
+    </nav>
+
+    <a href="#登录">
+      <button class="cta-btn" id="loginBtn">
+      hi,teacher
+      </button>
+    </a>
+  </header>
+
+  <main class="main-content2">
+    <h1 class="main-title">多光谱材料识别 <br>数据管理系统</h1>
+    <p class="sub-text">待填写待填写待填写待填写待填写待填写待填写待填写</p>
+  </main>
+
+
+
+
+
+<!-- ================登录页弹窗============== -->
+ <!-- <div class="modal-overlay" id="loginModal"> -->
+        <!-- 登录弹窗内容 -->
+        <!-- <div class="login-modal">
+            <div class="modal-title">
+                用户登录
+                <span class="close-btn" id="closeBtn">&times;</span>
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-item">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" placeholder="请输入用户名">
+                    <div class="error-tip" id="usernameError">用户名不能为空</div>
+                </div>
+                <div class="form-item">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" placeholder="请输入密码">
+                    <div class="error-tip" id="passwordError">密码不能为空</div>
+                </div>
+                <button type="submit" class="submit-btn">登录</button>
+            </form>
+        </div>
+    </div> -->
+
+
+
+
+  
+
+</div>
+
+<script>
+  // 获取需要点击的元素和需要显示的菜单
+const dropdownContainer = document.querySelector('.has-dropdown');
+const dropdownBtn = dropdownContainer.querySelector('.nav-btn');
+const dropdownMenu = dropdownContainer.querySelector('.dropdown-menu');
+
+// 点击按钮时触发
+dropdownBtn.addEventListener('click', function(e) {
+  e.preventDefault(); // 阻止a标签默认跳转
+  e.stopPropagation();
+  
+  // 切换菜单的显示/隐藏状态
+  dropdownMenu.classList.toggle('show');
+  
+  // 给父容器加个active类，用来改变按钮自己（从透明变成白色）的样式
+  dropdownContainer.classList.toggle('active');
+});
+
+// 进阶优化：点击页面其他地方时，关掉下拉菜单
+document.addEventListener('click', function(e) {
+  if (!dropdownContainer.contains(e.target)) {
+    dropdownMenu.classList.remove('show');
+    dropdownContainer.classList.remove('active');
+  }
+});
+
+
+
+// ==================登录页弹窗===================
+
+const loginBtn = document.getElementById('loginBtn');
+        const loginModal = document.getElementById('loginModal');
+        const closeBtn = document.getElementById('closeBtn');
+        const loginForm = document.getElementById('loginForm');
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const usernameError = document.getElementById('usernameError');
+        const passwordError = document.getElementById('passwordError');
+
+        // 点击登录按钮显示弹窗
+        loginBtn.addEventListener('click', function() {
+            loginModal.classList.add('active');
+            // 显示弹窗后自动聚焦到用户名输入框
+            username.focus();
+        });
+
+        // 点击关闭按钮隐藏弹窗
+        closeBtn.addEventListener('click', function() {
+            loginModal.classList.remove('active');
+            // 清空表单和错误提示
+            loginForm.reset();
+            usernameError.style.display = 'none';
+            passwordError.style.display = 'none';
+        });
+
+        // 点击遮罩层空白处关闭弹窗
+        loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                closeBtn.click();
+            }
+        });
+
+        // 表单提交验证
+        loginForm.addEventListener('submit', function(e) {
+            // 阻止表单默认提交行为
+            e.preventDefault();
+            
+            // 重置错误提示
+            usernameError.style.display = 'none';
+            passwordError.style.display = 'none';
+            
+            let isValid = true;
+            
+            // 验证用户名
+            if (!username.value.trim()) {
+                usernameError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // 验证密码
+            if (!password.value.trim()) {
+                passwordError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // 验证通过后的处理（实际项目中这里会调用接口）
+           // 验证通过后的处理（根据不同用户名进行分发）
+            if (isValid) {
+                // 1. 获取当前输入的用户名和密码
+                const inputUser = username.value.trim();
+                const inputPass = password.value.trim();
+
+                // 2. 模拟一个简单的密码校验（假设大家的密码都是 123456）
+                if (inputPass !== '123456') {
+                    alert('密码错误！(测试密码请统一输入 123456)');
+                    return; // 密码不对就直接停在这里，不往下执行了
+                }
+
+                // 3. 核心逻辑：根据不同的用户名，指派不同的跳转链接
+                if (inputUser === 'admin') {
+                    // 如果输入的是 admin（管理员）
+                    window.location.href = 'admin_page.html'; // 请确保你建了这个文件
+                    
+                } else if (inputUser === 'student') {
+                    // 如果输入的是 userA
+                    window.location.href = 'student_page.html'; // 请确保你建了这个文件
+                    
+                } else if (inputUser === 'teacher') {
+                    // 如果输入的是 userB
+                    window.location.href = 'teacher_page.html'; // 请确保你建了这个文件
+                    
+                } else {
+                    // 如果输入的既不是 admin，也不是 userA/B
+                    alert('该用户不存在！测试请使用：admin, userA 或 userB');
+                    // 只有账号输错了才清空表单，方便重新输入
+                    username.value = '';
+                    password.value = '';
+                }
+            }
+        });
+
+        // 按ESC键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && loginModal.classList.contains('active')) {
+                closeBtn.click();
+            }
+        });
+
+
+</script>
+
+
+
+    
+</body>
+</html>
